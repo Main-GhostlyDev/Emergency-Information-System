@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Management Information</title>
-    <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlUvcfv0vnBeUlCBcZwqzJ-1pKhqpnlfTOJg&s" type="image/png"> <!-- Favicon -->
+    <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlUvcfv0vnBeUlCBcZwqzJ-1pKhqpnlfTOJg&s" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212; /* Dark background */
-            color: #ffffff; /* White text */
+            background-color: #121212;
+            color: #ffffff;
             text-align: center;
-            padding: 10px; /* Reduced padding for smaller screens */
-            margin: 0; /* Remove default margin */
+            padding: 10px;
+            margin: 0;
         }
         #logo {
             position: absolute;
             top: 10px;
             left: 10px;
-            max-width: 110px; /* Maximum width */
-            height: auto; /* Maintain aspect ratio */
+            max-width: 110px;
+            height: auto;
         }
         #clock {
             font-size: 2em;
@@ -29,64 +29,61 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            font-size: 0.9em; /* Slightly smaller font for better fit on small screens */
+            font-size: 0.9em;
         }
         th, td {
-            border: 1px solid #444; /* Dark gray border */
-            padding: 8px; /* Reduced padding for smaller screens */
+            border: 1px solid #444;
+            padding: 8px;
             text-align: left;
         }
         th {
-            background-color: #1e1e1e; /* Dark gray for headers */
+            background-color: #1e1e1e;
         }
-        /* Define colors for emergency types (dark theme compatible) */
         .bushfire, .building-fire {
-            background-color: #ff4444; /* Red for emergencies */
+            background-color: #ff4444;
         }
         .planned-burn {
-            background-color: #4caf50; /* Green for planned burn */
+            background-color: #4caf50;
         }
         .tree-down {
-            background-color: #2196f3; /* Blue for tree down */
+            background-color: #2196f3;
         }
         .health-alert {
-            background-color: #ffeb3b; /* Yellow for health alert */
-            color: #000000; /* Black text for visibility */
+            background-color: #ffeb3b;
+            color: #000000;
         }
         .road-accident {
-            background-color: #f44336; /* Coral for road accident */
+            background-color: #f44336;
         }
         .rescue {
-            background-color: #3f51b5; /* Indigo for rescue */
+            background-color: #3f51b5;
         }
         .other {
-            background-color: #ff9800; /* Orange for other */
+            background-color: #ff9800;
         }
-        /* Flashing border effect */
         @keyframes blink {
             50% { border-color: red; }
             100% { border-color: rgb(25, 0, 255); }
         }
         .flashing-border {
-            border-width: 5px; /* Thicker border width */
-            border-style: solid; /* Solid border for visibility */
-            animation: blink 0.75s infinite; /* Blinking animation */
+            border-width: 5px;
+            border-style: solid;
+            animation: blink 0.75s infinite;
         }
         #intro {
-            margin-top: 120px; /* Added margin to prevent overlap with logo */
+            margin-top: 120px;
             margin-bottom: 20px;
-            font-size: 1.2em; /* Slightly larger font for emphasis */
+            font-size: 1.2em;
         }
-        /* Responsive text size */
         @media (max-width: 600px) {
             #clock {
-                font-size: 1.5em; /* Smaller clock on smaller screens */
+                font-size: 1.5em;
             }
             th, td {
-                font-size: 0.8em; /* Smaller text for table */
+                font-size: 0.8em;
             }
             #intro h1 {
-                font-size: 1.5em; /* Adjusted title size */
+                font-size: 1.5em;
             }
         }
     </style>
@@ -113,7 +110,6 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Emergency data will be populated here -->
             </tbody>
         </table>
     </div>
@@ -127,15 +123,14 @@
 
         async function fetchEmergencyData() {
             try {
-                const response = await fetch('https://emergency.vic.gov.au/public/events-geojson.json'); // JSON endpoint
+                const response = await fetch('https://emergency.vic.gov.au/public/events-geojson.json');
                 const data = await response.json();
                 
                 const tableData = data.features.map(feature => {
                     const { category1, status, location, updated } = feature.properties;
-                    return { category: category1, status, location, updated: new Date(updated) }; // Convert to Date object
+                    return { category: category1, status, location, updated: new Date(updated) };
                 });
 
-                // Sort by Last Updated (descending)
                 tableData.sort((a, b) => b.updated - a.updated);
 
                 populateTable(tableData);
@@ -146,16 +141,15 @@
 
         function populateTable(tableData) {
             const tbody = document.getElementById('emergencyTable').getElementsByTagName('tbody')[0];
-            tbody.innerHTML = ''; // Clear existing data
+            tbody.innerHTML = '';
 
             tableData.forEach(row => {
                 const newRow = tbody.insertRow();
                 newRow.insertCell().textContent = row.category;
                 newRow.insertCell().textContent = row.status;
                 newRow.insertCell().textContent = row.location;
-                newRow.insertCell().textContent = row.updated.toLocaleString('en-AU', { timeZone: 'Australia/Sydney' }); // Format for AEST
+                newRow.insertCell().textContent = row.updated.toLocaleString('en-AU', { timeZone: 'Australia/Sydney' });
 
-                // Add color coding based on emergency type
                 switch (row.category.toLowerCase()) {
                     case 'bushfire':
                     case 'building fire':
@@ -183,7 +177,6 @@
                         break;
                 }
 
-                // Add flashing border for statuses that are NOT 'complete', 'patrolled', 'under control', 'safe', or 'community update'
                 if (row.status.toLowerCase() !== 'complete' && row.status.toLowerCase() !== 'patrolled' && row.status.toLowerCase() !== 'under control' && row.status.toLowerCase() !== 'safe' && row.status.toLowerCase() !== 'community update') {
                     newRow.classList.add('flashing-border');
                 }
@@ -191,7 +184,7 @@
         }
 
         function setupWebSocket() {
-            const socket = new WebSocket('wss://your-websocket-server-url'); // Replace with your WebSocket URL
+            const socket = new WebSocket('wss://your-websocket-server-url');
 
             socket.onmessage = function(event) {
                 const newEmergencyData = JSON.parse(event.data);
@@ -203,15 +196,12 @@
             };
         }
 
-        // Update clock continuously every second
         setInterval(updateClock, 1000);
-        // Fetch emergency data every 10 seconds
         setInterval(fetchEmergencyData, 10000);
 
-        // Initial calls
         updateClock();
         fetchEmergencyData();
-        setupWebSocket(); // Setup WebSocket connection
+        setupWebSocket();
     </script>
     
 </body>

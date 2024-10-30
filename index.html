@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Management Information</title>
+    <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlUvcfv0vnBeUlCBcZwqzJ-1pKhqpnlfTOJg&s" type="image/png"> <!-- Favicon -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Dark background */
+            color: #ffffff; /* White text */
+            text-align: center;
+            padding: 10px; /* Reduced padding for smaller screens */
+            margin: 0; /* Remove default margin */
+        }
+        #logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            max-width: 110px; /* Maximum width */
+            height: auto; /* Maintain aspect ratio */
+        }
+        #clock {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em; /* Slightly smaller font for better fit on small screens */
+        }
+        th, td {
+            border: 1px solid #444; /* Dark gray border */
+            padding: 8px; /* Reduced padding for smaller screens */
+            text-align: left;
+        }
+        th {
+            background-color: #1e1e1e; /* Dark gray for headers */
+        }
+        /* Define colors for emergency types (dark theme compatible) */
+        .bushfire, .building-fire {
+            background-color: #ff4444; /* Red for emergencies */
+        }
+        .planned-burn {
+            background-color: #4caf50; /* Green for planned burn */
+        }
+        .tree-down {
+            background-color: #2196f3; /* Blue for tree down */
+        }
+        .health-alert {
+            background-color: #ffeb3b; /* Yellow for health alert */
+            color: #000000; /* Black text for visibility */
+        }
+        .road-accident {
+            background-color: #f44336; /* Coral for road accident */
+        }
+        .rescue {
+            background-color: #3f51b5; /* Indigo for rescue */
+        }
+        .other {
+            background-color: #ff9800; /* Orange for other */
+        }
+        /* Flashing border effect */
+        @keyframes blink {
+            50% { border-color: red; }
+            100% { border-color: rgb(25, 0, 255); }
+        }
+        .flashing-border {
+            border-width: 5px; /* Thicker border width */
+            border-style: solid; /* Solid border for visibility */
+            animation: blink 0.75s infinite; /* Blinking animation */
+        }
+        #intro {
+            margin-top: 120px; /* Added margin to prevent overlap with logo */
+            margin-bottom: 20px;
+            font-size: 1.2em; /* Slightly larger font for emphasis */
+        }
+        /* Responsive text size */
+        @media (max-width: 600px) {
+            #clock {
+                font-size: 1.5em; /* Smaller clock on smaller screens */
+            }
+            th, td {
+                font-size: 0.8em; /* Smaller text for table */
+            }
+            #intro h1 {
+                font-size: 1.5em; /* Adjusted title size */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <img id="logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlUvcfv0vnBeUlCBcZwqzJ-1pKhqpnlfTOJg&s" alt="Logo">
+    
+    <div id="clock"></div>
+
+    <div id="intro">
+        <h1>Emergency Management Information System</h1>
+    </div>
+
+    <div id="content">
+        <h2>ID: 2426046 || VicCFA Pager</h2>
+        <table id="emergencyTable">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Emergency data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Australia/Sydney' };
+            document.getElementById('clock').innerHTML = now.toLocaleTimeString('en-AU', options) + ' AEST';
+        }
+
+        async function fetchEmergencyData() {
+            try {
+                const response = await fetch('https://emergency.vic.gov.au/public/events-geojson.json'); // JSON endpoint
+                const data = await response.json();
+                
+                const tableData = data.features.map(feature => {
+                    const { category1, status, location, updated } = feature.properties;
+                    return { category: category1, status, location, updated: new Date(updated) }; // Convert to Date object
+                });
+
+                // Sort by Last Updated (descending)
+                tableData.sort((a, b) => b.updated - a.updated);
+
+                populateTable(tableData);
+            } catch (error) {
+                console.error('Error fetching emergency data:', error);
+            }
+        }
+
+        function populateTable(tableData) {
+            const tbody = document.getElementById('emergencyTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = ''; // Clear existing data
+
+            tableData.forEach(row => {
+                const newRow = tbody.insertRow();
+                newRow.insertCell().textContent = row.category;
+                newRow.insertCell().textContent = row.status;
+                newRow.insertCell().textContent = row.location;
+                newRow.insertCell().textContent = row.updated.toLocaleString('en-AU', { timeZone: 'Australia/Sydney' }); // Format for AEST
+
+                // Add color coding based on emergency type
+                switch (row.category.toLowerCase()) {
+                    case 'bushfire':
+                    case 'building fire':
+                        newRow.classList.add('bushfire');
+                        break;
+                    case 'planned burn':
+                        newRow.classList.add('planned-burn');
+                        break;
+                    case 'tree down':
+                        newRow.classList.add('tree-down');
+                        break;
+                    case 'health alert':
+                        newRow.classList.add('health-alert');
+                        break;
+                    case 'accident / rescue - road accident':
+                        newRow.classList.add('road-accident');
+                        break;
+                    case 'rescue':
+                        newRow.classList.add('rescue');
+                        break;
+                    case 'other':
+                        newRow.classList.add('other');
+                        break;
+                    default:
+                        break;
+                }
+
+                // Add flashing border for statuses that are NOT 'complete', 'patrolled', 'under control', 'safe', or 'community update'
+                if (row.status.toLowerCase() !== 'complete' && row.status.toLowerCase() !== 'patrolled' && row.status.toLowerCase() !== 'under control' && row.status.toLowerCase() !== 'safe' && row.status.toLowerCase() !== 'community update') {
+                    newRow.classList.add('flashing-border');
+                }
+            });
+        }
+
+        function setupWebSocket() {
+            const socket = new WebSocket('wss://your-websocket-server-url'); // Replace with your WebSocket URL
+
+            socket.onmessage = function(event) {
+                const newEmergencyData = JSON.parse(event.data);
+                populateTable(newEmergencyData);
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket Error:', error);
+            };
+        }
+
+        // Update clock continuously every second
+        setInterval(updateClock, 1000);
+        // Fetch emergency data every 10 seconds
+        setInterval(fetchEmergencyData, 10000);
+
+        // Initial calls
+        updateClock();
+        fetchEmergencyData();
+        setupWebSocket(); // Setup WebSocket connection
+    </script>
+    
+</body>
+</html>

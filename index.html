@@ -184,7 +184,7 @@
         }
 
         function setupWebSocket() {
-            const socket = new WebSocket('wss://your-websocket-server-url');
+            const socket = new WebSocket('websocket-url');
 
             socket.onmessage = function(event) {
                 const newEmergencyData = JSON.parse(event.data);
